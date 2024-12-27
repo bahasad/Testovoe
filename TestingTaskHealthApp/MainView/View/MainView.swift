@@ -9,18 +9,20 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State private var path = NavigationPath()
+    @State var path = NavigationPath()
     @StateObject var viewModel = MainViewModel()
     @State private var hasLoaded = false
+    let column = [GridItem(.flexible())]
     
     var body: some View {
         ZStack {
             Color.appColorBackround.ignoresSafeArea(.all)
             NavigationStack(path: $path) {
-                ScrollView(.vertical, showsIndicators: false ) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        SortingButtonGroup(viewModel: viewModel)
-                        VStack(spacing: 16) {
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    SortingButtonGroup(viewModel: viewModel)
+                    ScrollView(.vertical, showsIndicators: false ) {
+                        VStack( spacing: 16) {
                             if viewModel.usersArray.isEmpty {
                                 Text("No users available").foregroundColor(.red)
                             } else {
@@ -30,17 +32,21 @@ struct MainView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .onAppear {
-                        if !hasLoaded {
-                            viewModel.loadUsersFromJSON()
-                            hasLoaded = true
-                        }
+                    .simultaneousGesture(TapGesture())
+                    .searchable(text: $viewModel.searchText)
+                    .navigationTitle("Педиатры")
+                    .navigationBarTitleDisplayMode(.inline)
+                    
+                }
+                .padding(.horizontal, 16)
+                .onAppear {
+                    if !hasLoaded {
+                        viewModel.loadUsersFromJSON()
+                        hasLoaded = true
                     }
                 }
-                .searchable(text: $viewModel.searchText)
-                .navigationTitle("Педиатры")
-                .navigationBarTitleDisplayMode(.inline)
+                
+                
             }
         }
     }
@@ -67,6 +73,7 @@ struct CardView: View {
                     }
                     HStack(spacing: 4) {
                         Image(systemName: "star")
+                            .font(.system(size: 8))
                             .frame(width: 12, height: 12)
                     }
                     HStack(spacing: 2) {
@@ -114,17 +121,33 @@ struct CardView: View {
             .padding(.horizontal, 0)
             .padding(.top, 20)
             
-            Button {
-                print("Btn tapped")
-            } label: {
-                Text("Записаться")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.appColorWhite)
+            if let freeReceptionTime = user.freeReceptionTime, freeReceptionTime.isEmpty {
+                Button {
+                    
+                } label: {
+                    Text("Нет свободного расписания")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color.black)
+                }
+                .contentShape(Rectangle())
+                .frame(height: 47)
+                .frame(maxWidth: .infinity)
+                .background(.appColorGrayForDisabledBtn)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                NavigationLink(
+                    destination: DetailsView(users: [user])
+                ) {
+                    Text("Записаться")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.appColorWhite)
+                        .frame(height: 47)
+                        .frame(maxWidth: .infinity)
+                        .background(.appColorRed)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .contentShape(Rectangle())
             }
-            .frame(height: 47)
-            .frame(maxWidth: .infinity)
-            .background(.appColorRed)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
             
         }
         .padding(.horizontal, 16)
@@ -159,8 +182,7 @@ struct SortingButton: View {
         }) {
             buttonContent
         }
-        
-        
+        .contentShape(Rectangle())
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(viewModel.selectedSortOption == option ? .appColorRed : Color.clear)
