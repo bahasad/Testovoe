@@ -18,42 +18,51 @@ struct MainView: View {
         ZStack {
             Color.appColorBackround.ignoresSafeArea(.all)
             NavigationStack(path: $path) {
-                
                 VStack(alignment: .leading, spacing: 16) {
                     SortingButtonGroup(viewModel: viewModel)
-                    ScrollView(.vertical, showsIndicators: false ) {
-                        VStack( spacing: 16) {
-                            if viewModel.usersArray.isEmpty {
-                                Text("No users available").foregroundColor(.red)
-                            } else {
-                                ForEach(viewModel.usersArray) { user in
-                                    CardView(user: user)
-                                }
-                            }
+                        .padding(.horizontal, 16)
+                    
+                    List {
+                        ForEach(viewModel.usersArray) { user in
+                            CardView(user: user)
+                                .padding(.vertical, 8)
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
                         }
                     }
-                    .simultaneousGesture(TapGesture())
-                    .searchable(text: $viewModel.searchText)
-                    .navigationTitle("Педиатры")
-                    .navigationBarTitleDisplayMode(.inline)
+                    .listStyle(PlainListStyle())
                     
-                }
-                .padding(.horizontal, 16)
-                .onAppear {
-                    if !hasLoaded {
-                        viewModel.loadUsersFromJSON()
-                        hasLoaded = true
+                    .onAppear {
+                        if !hasLoaded {
+                            viewModel.loadUsersFromJSON()
+                            hasLoaded = true
+                        }
                     }
+                    .searchable(text: $viewModel.searchText)
                 }
-                
-                
+                .navigationTitle("Педиатры")
+                .navigationBarTitleDisplayMode(.inline)
+            }
+        }
+    }
+}
+
+struct StarView: View {
+    var rating: Double
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(1...5, id: \.self) { index in
+                Image(systemName: index <= Int(rating.rounded(.down)) ? "star.fill" : "star")
+                    .foregroundColor(index <= Int(rating.rounded(.down)) ? Color.appColorRed : Color.appColorGray)
+                    .font(.system(size: 10))
             }
         }
     }
 }
 
 struct CardView: View {
-    
     var user: User
     
     var body: some View {
@@ -62,43 +71,26 @@ struct CardView: View {
                 AsyncImage(url: URL(string: user.avatar ?? ""))
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
-                VStack(alignment: .leading) {
+                
+                VStack(alignment: .leading, spacing: 4) {
                     Text(user.lastName ?? "")
                         .font(.system(size: 16, weight: .bold))
-                    HStack(spacing: 4) {
-                        let text = (user.firstName ?? "") + " " + (user.patronymic ?? "")
-                        Text(text)
-                            .font(.system(size: 16, weight: .bold))
-                        
-                    }
-                    HStack(spacing: 4) {
-                        Image(systemName: "star")
-                            .font(.system(size: 8))
-                            .frame(width: 12, height: 12)
-                    }
-                    HStack(spacing: 2) {
-                        if let specialization = user.specialization, let firstSpec = specialization.first?.name {
-                            Text(firstSpec)
-                                .font(.system(size: 14, weight: .light))
-                                .foregroundColor(.gray)
-                        } else {
-                            Text("Специализация не указана")
-                                .font(.system(size: 14, weight: .light))
-                                .foregroundColor(.gray)
-                        }
-                        Text("・")
-                            .font(.system(size: 14, weight: .light))
+                    
+                    Text("\((user.firstName ?? "") + " " + (user.patronymic ?? ""))")
+                        .font(.system(size: 16, weight: .regular))
+                    
+                    if let rating = user.ratingsRating {
+                        StarView(rating: rating)
+                    } else {
+                        Text("Нет данных о рейтинге")
+                            .font(.system(size: 14))
                             .foregroundColor(.gray)
-                        if let seniority = user.seniority, seniority >= 0 {
-                            Text("стаж \(seniority) лет")
-                                .font(.system(size: 14, weight: .light))
-                                .foregroundColor(.gray)
-                        } else {
-                            Text("Стаж не указан")
-                                .font(.system(size: 14, weight: .light))
-                                .foregroundColor(.gray)
-                        }
                     }
+
+                    Text("\((user.specialization?.first?.name ?? "Специализация не указана")) • стаж \(user.seniority ?? 0) лет")
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(.gray)
+                    
                     if let price = user.videoChatPrice {
                         Text("от \(price) ₽")
                             .font(.system(size: 16, weight: .bold))
@@ -108,58 +100,47 @@ struct CardView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.gray)
                     }
-                    
-                    
                 }
                 .padding(.top, 10)
                 Spacer()
                 Image(systemName: "heart")
                     .foregroundStyle(.appColorGray)
                     .frame(width: 24, height: 24)
-                
             }
-            .padding(.horizontal, 0)
-            .padding(.top, 20)
+            .padding(.horizontal, 16)
             
             if let freeReceptionTime = user.freeReceptionTime, freeReceptionTime.isEmpty {
-                Button {
-                    
-                } label: {
-                    Text("Нет свободного расписания")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.black)
-                }
-                .contentShape(Rectangle())
-                .frame(height: 47)
-                .frame(maxWidth: .infinity)
-                .background(.appColorGrayForDisabledBtn)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                Text("Нет свободного расписания")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, minHeight: 47)
+                    .background(Color.appColorGrayForDisabledBtn)
+                    .cornerRadius(8)
+                    .padding(.horizontal, 16)
             } else {
-                NavigationLink(
-                    destination: DetailsView(users: [user])
-                ) {
+                NavigationLink(destination: DetailsView(users: [user])) {
                     Text("Записаться")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.appColorWhite)
-                        .frame(height: 47)
-                        .frame(maxWidth: .infinity)
-                        .background(.appColorRed)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, minHeight: 47)
+                        .background(Color.appColorRed)
+                        .cornerRadius(8)
+                        .padding(.horizontal, 16)
                 }
-                .contentShape(Rectangle())
+                .buttonStyle(PlainButtonStyle())
             }
-            
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.appColorGray, lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 16) 
     }
-    
 }
+
+
+
 
 
 struct SortingButton: View {

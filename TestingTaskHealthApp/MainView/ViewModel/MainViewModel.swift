@@ -43,7 +43,7 @@ class MainViewModel: ObservableObject {
             }
         }
 
-        print("Sorted Users: \(usersArray)")
+        print("Sorted Users: \(usersArray.map { $0.ratingsRating ?? 0 })")
     }
 
     
