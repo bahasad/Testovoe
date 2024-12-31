@@ -22,35 +22,40 @@ struct MainView: View {
                     SortingButtonGroup(viewModel: viewModel)
                         .padding(.horizontal, 16)
                     
-                    List {
-                        ForEach(viewModel.usersArray) { user in
-                            CardView(user: user)
-                                .padding(.vertical, 8)
-                                .listRowInsets(EdgeInsets())
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(viewModel.filteredUsers) { user in
+                                NavigationLink(destination: DetailsView(users: [user])) {
+                                    CardView(user: user)
+                                        .padding(.vertical, 8)
+                                        .background(Color.clear)
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(PlainButtonStyle()) 
+                            }
                         }
+                        .padding(.horizontal, 16)
                     }
-                    .listStyle(PlainListStyle())
-                    
-                    .onAppear {
-                        if !hasLoaded {
-                            viewModel.loadUsersFromJSON()
-                            hasLoaded = true
-                        }
-                    }
-                    .searchable(text: $viewModel.searchText)
+
                 }
                 .navigationTitle("Педиатры")
                 .navigationBarTitleDisplayMode(.inline)
+                .searchable(text: $viewModel.searchText, placement: .automatic)
+                .onAppear {
+                    if !hasLoaded {
+                        viewModel.loadUsersFromJSON()
+                        hasLoaded = true
+                    }
+                }
             }
         }
     }
 }
 
+
 struct StarView: View {
     var rating: Double
-
+    
     var body: some View {
         HStack(spacing: 4) {
             ForEach(1...5, id: \.self) { index in
@@ -86,7 +91,7 @@ struct CardView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                     }
-
+                    
                     Text("\((user.specialization?.first?.name ?? "Специализация не указана")) • стаж \(user.seniority ?? 0) лет")
                         .font(.system(size: 14, weight: .light))
                         .foregroundColor(.gray)
@@ -108,34 +113,39 @@ struct CardView: View {
                     .frame(width: 24, height: 24)
             }
             .padding(.horizontal, 16)
-            
-            if let freeReceptionTime = user.freeReceptionTime, freeReceptionTime.isEmpty {
-                Text("Нет свободного расписания")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, minHeight: 47)
-                    .background(Color.appColorGrayForDisabledBtn)
-                    .cornerRadius(8)
-                    .padding(.horizontal, 16)
-            } else {
-                NavigationLink(destination: DetailsView(users: [user])) {
-                    Text("Записаться")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, minHeight: 47)
-                        .background(Color.appColorRed)
-                        .cornerRadius(8)
-                        .padding(.horizontal, 16)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
+ 
+            FreeScheduleBtn(user: user, padding: 16)
         }
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.appColorGray, lineWidth: 1)
         )
-        .padding(.horizontal, 16) 
+        .padding(.horizontal, 0)
+    }
+}
+
+struct FreeScheduleBtn: View {
+    var user: User
+    var padding: CGFloat?
+    var body: some View {
+        if let freeReceptionTime = user.freeReceptionTime, freeReceptionTime.isEmpty {
+            Text("Нет свободного расписания")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, minHeight: 47)
+                .background(Color.appColorGrayForDisabledBtn)
+                .cornerRadius(8)
+                .padding(.horizontal, padding)
+        } else {
+            Text("Записаться")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, minHeight: 47)
+                .background(Color.appColorRed)
+                .cornerRadius(8)
+                .padding(.horizontal, padding)
+        }
     }
 }
 

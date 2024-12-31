@@ -45,6 +45,16 @@ class MainViewModel: ObservableObject {
 
         print("Sorted Users: \(usersArray.map { $0.ratingsRating ?? 0 })")
     }
+    
+    var filteredUsers : [User] {
+        if searchText.isEmpty {
+            return usersArray
+        } else {
+            return usersArray.filter { user in
+                (user.lastName ?? "").lowercased().contains(searchText.lowercased())
+            }
+        }
+    }
 
     
     
