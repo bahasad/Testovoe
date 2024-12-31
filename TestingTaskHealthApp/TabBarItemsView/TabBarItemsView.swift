@@ -13,8 +13,6 @@ struct TabBarItemsView: View {
         let appearance = UITabBarAppearance()
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.gray]
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-//        UITabBar.appearance().tintColor = .red
-//        UITabBar.appearance().unselectedItemTintColor = .gray
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
         UITabBar.appearance().tintColor = .gray
