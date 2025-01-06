@@ -16,16 +16,20 @@ struct SortingButtonGroupView: View {
                 SortingButtonView(viewModel: viewModel, option: option)
                     .overlay(
                         Divider()
-                            .background(option == .rating ? Color.clear : .appColorGray)
+                            .background(option == .rating ? Color.clear : .appColorForStroke)
                             .padding(.vertical, 1),
                         alignment: .trailing
                     )
             }
         }
-        .background(
+        .background(Color.appColorForCards)
+        .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.appColorGray, lineWidth: 1)
+                .stroke(Color.appColorForStroke, lineWidth: 1)
+            
         )
+        
+        
         .cornerRadius(8)
     }
 }

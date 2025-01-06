@@ -13,45 +13,54 @@ struct TabBarItemsView: View {
         let appearance = UITabBarAppearance()
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.gray]
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        appearance.backgroundColor = .appColorForCards
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
-        UITabBar.appearance().tintColor = .gray
-        UITabBar.appearance().unselectedItemTintColor = .gray
     }
     var body: some View {
         TabView {
-            
-                MainView()
-            
+            MainView()
                 .tabItem {
-                    Image("House")
+                    Image(systemName: "house.fill")
                     Text("Главная")
                 }
+                .accentColor(.appColorRed)
+                .foregroundColor(.gray)
+            
             NavigationStack {
                 CalendarView()
             }
             
-                .tabItem {
-                    Image("Calendar")
-                    Text("Приёмы")
-                }
+            .tabItem {
+                Image(systemName: "calendar")
+                Text("Приёмы")
+            }
+            .accentColor(.appColorRed)
+            .foregroundColor(.gray)
+            
             NavigationStack {
                 ChatView()
             }
             
-                .tabItem {
-                    Image("Chat")
-                    Text("Чат")
-                }
+            .tabItem {
+                Image(systemName: "bubble.left.fill")
+                Text("Чат")
+            }
+            .accentColor(.appColorRed)
+            .foregroundColor(.gray)
+            
             NavigationStack {
                 ProfileView()
             }
             
-                .tabItem {
-                    Image("Profile")
-                    Text("Профиль")
-                }
+            .tabItem {
+                Image(systemName: "person.circle.fill")
+                Text("Профиль")
+            }
+            .accentColor(.appColorRed)
+            .foregroundColor(.gray)
         }
+        .accentColor(.appColorRed)
     }
 }
 
