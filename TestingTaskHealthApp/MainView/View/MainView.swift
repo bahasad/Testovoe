@@ -16,7 +16,6 @@ struct MainView: View {
     
     var body: some View {
         ZStack {
-            Color.appColorBackround.ignoresSafeArea(.all)
             NavigationStack(path: $path) {
                 VStack(alignment: .leading, spacing: 16) {
                     SortingButtonGroupView(viewModel: viewModel)
@@ -36,8 +35,8 @@ struct MainView: View {
                         }
                         .padding(.horizontal, 16)
                     }
-
                 }
+                .background(Color.appColorBackGray.ignoresSafeArea(.all))
                 .navigationTitle("Педиатры")
                 .navigationBarTitleDisplayMode(.inline)
                 .searchable(text: $viewModel.searchText, placement: .automatic)

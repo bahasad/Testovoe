@@ -57,9 +57,11 @@ struct CardView: View {
             FreeScheduleBtnView(user: user, padding: 16)
         }
         .padding(.vertical, 8)
-        .background(
+        .background(Color.appColorForCards)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.appColorGray, lineWidth: 1)
+                .stroke(Color.appColorForStroke, lineWidth: 1)
         )
         .padding(.horizontal, 0)
     }
